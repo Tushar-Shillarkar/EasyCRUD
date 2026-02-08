@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # Backend: Spring Boot Application
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      # These variables allow you to switch between local MySQL or AWS RDS
+      - SPRING_DATASOURCE_URL=jdbc:mysql://${DB_HOST:-myserver-db.c30mgqso0d3o.eu-north-1.rds.amazonaws.com}:3306/student_db
+      - SPRING_DATASOURCE_USERNAME=${DB_USER:-admin}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-12345678}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    networks:
+      - easycrud-net
+
+  # Frontend: React Application
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    stdin_open: true
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - REACT_APP_API_URL=http://localhost:8080
+    depends_on:
+      - backend
+    networks:
+      - easycrud-net
+
+networks:
+  easycrud-net:
+    driver: bridge
