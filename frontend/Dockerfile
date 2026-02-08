@@ -6,10 +6,10 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-# Stage 2: Serve with Nginx
-FROM nginx:stable-alpine
-# Copy the build output to replace the default nginx contents
-COPY --from=build /app/build /usr/share/nginx/html
-# Copy a custom nginx config if you have one, or use default
+# Stage 2: Serve with Apache (httpd)
+FROM httpd:2.4-alpine
+# Copy the build output to Apache's default public directory
+# Note: Use /app/dist if you are using Vite, or /app/build for Create React App
+COPY --from=build /app/build/ /usr/local/apache2/htdocs/
+
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
